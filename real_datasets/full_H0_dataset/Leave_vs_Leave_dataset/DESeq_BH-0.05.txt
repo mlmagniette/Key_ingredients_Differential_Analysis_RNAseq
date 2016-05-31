@@ -1,0 +1,1 @@
+baseMean	baseMeanA	baseMeanB	foldChange	log2FoldChange	pvalue	padj	dispersion

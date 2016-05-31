@@ -1,0 +1,1 @@
+baseMean	baseMeanA	baseMeanB	log2FoldChange	X.Intercept.	batch2	groupLeaf	dispersion	pvalue	padj
