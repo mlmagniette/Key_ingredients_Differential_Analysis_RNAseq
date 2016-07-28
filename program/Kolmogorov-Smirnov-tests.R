@@ -7,7 +7,12 @@
 # output: graph of the median of the Kolmogorov-Smirnov test statistics for various proportions of genes of the full H0 dataset saved in the result folder  
 #######################################################################
 file<- system("ls ../synthetic_datasets/synt*/*Com*",T)
-
+## remove filtered DESeq2
+file<-file[-grep("filter-DESeq2_CompleteListe.txt",file)]
+## remove  filtered DESeq2 from methods
+methods.KS<-c("DESeq2","DESeq","edgeR","edgeR filtered", "glm edgeR filtered","limma-voom filtered","glm edgeR","limma-voom")
+method.nb<-length(methods.KS)
+## 
 n=1000 # number of genes 
 JJ=100 # number of sampling
 pvalue.ks<-list()
@@ -33,16 +38,16 @@ for (i in 1:length(file))
 
 cat("Percentage of rejected tests after Bonferroni adjustment \n")
 print(100*sum(p.adjust(unlist(pvalue.ks),"bonferroni")<=alpha)/(length(file) *JJ))
-# 67.07%
+# 69.34 %
 
 save(pvalue.ks,stat.ks,file="../results/KS_test.RData")
 
-pvalue.ks.res<-matrix(unlist(lapply(pvalue.ks,mean)),nrow=length(file)/length(methods),byrow=T,ncol=length(methods))
-colnames(pvalue.ks.res)<-methods
+pvalue.ks.res<-matrix(unlist(lapply(pvalue.ks,mean)),nrow=length(file)/method.nb,byrow=T,ncol=method.nb)
+colnames(pvalue.ks.res)<-methods.KS
 
 ## Work on the mean calculated over the JJ resamplings 
-stat.ks.res<-matrix(unlist(lapply(stat.ks,mean)),nrow=length(file)/length(methods),byrow=T,ncol=length(methods))
-colnames(stat.ks.res)<-methods
+stat.ks.res<-matrix(unlist(lapply(stat.ks,mean)),nrow=length(file)/method.nb,byrow=T,ncol=method.nb)
+colnames(stat.ks.res)<-methods.KS
 
 ## main graphic 
 tiff(paste("../results/stat.ks.n=",n,"_nb_reech=",JJ,"_median-BW.tiff",sep=""),width=2250,height=2250,pointsize=36)
@@ -50,7 +55,7 @@ par(mfrow=c(1,1))
 plot(x,boxplot(stat.ks.res[,1]~rep(x,each=10),plot=F)$stats[3,],pch=pch.index[1],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",ylim=c(0,.9),type="b",xaxt="n",lwd=4,lty=type.line[1])
 axis(1,at=x,labels=x)
 
-for (j in 2:length(methods))
+for (j in 2:method.nb)
     lines(x,boxplot(stat.ks.res[,j]~rep(x,each=10),plot=F)$stats[3,],pch=pch.index[j],type="b",lwd=4,lty=type.line[j])
 
 legend(x="topleft",legend=methods[which(type.line==1)],lty=1,pch=pch.index[which(type.line==1)],bty="n",lwd=4)
@@ -59,14 +64,16 @@ dev.off()
 ## supplementary graph to show the variability of limma-voom
 load("../results/KS_test.RData")
 
-stat.ks.res<-matrix(unlist(lapply(stat.ks,mean)),nrow=length(file)/length(methods),byrow=T,ncol=length(methods))
-colnames(stat.ks.res)<-methods
+stat.ks.res<-matrix(unlist(lapply(stat.ks,mean)),nrow=length(file)/method.nb,byrow=T,ncol=method.nb)
+colnames(stat.ks.res)<-methods.KS
 
 tiff("../results/varibility-stat.ks.tiff",width=2250,height=2250,pointsize=36)
 
-order.methods<-c("DESeq","edgeR","edgeR filtered","DESeq2","glm edgeR","limma-voom","DESeq2 filtered","glm edgeR filtered","limma-voom filtered")
+order.methods<-c("DESeq","edgeR","edgeR filtered","DESeq2","glm edgeR","limma-voom","glm edgeR filtered","limma-voom filtered")
 
 stat.ks.res<-stat.ks.res[,match(order.methods,methods)]
 par(mfrow=c(3,3))
-sapply(1:9,function(j) plot(rep(x,each=10),stat.ks.res[,j],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",main=order.methods[j],ylim=range(stat.ks.res)))
+sapply(1:6,function(j) plot(rep(x,each=10),stat.ks.res[,j],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",main=order.methods[j],ylim=range(stat.ks.res)))
+plot(rep(x,each=10),axes=FALSE,xlab="",ylab="",type="n")
+sapply(7:8,function(j) plot(rep(x,each=10),stat.ks.res[,j],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",main=order.methods[j],ylim=range(stat.ks.res)))
 dev.off()

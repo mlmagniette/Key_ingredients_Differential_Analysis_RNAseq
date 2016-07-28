@@ -17,7 +17,7 @@ DiffAnalysis.DESeq2<-function(countTable,filter=TRUE,alpha=0.05,repbio=2)
     cds<-DESeqDataSetFromMatrix(countData=countTable,
                                      colData=colData,design=~batch+group)
     cds<-DESeq(cds)
-    res<-results(cds,independentFiltering=filter)
+    res<-results(cds,independentFiltering=filter,alpha=0.05)
     hist(res$pvalue[!is.na(res$padj)],150,main="Histogram of raw pvalues",xlab="raw pvalues")
     DE.BH<-which(res$padj<alpha)
     res<-data.frame(res,dispersion=mcols(cds)$dispGeneEst)

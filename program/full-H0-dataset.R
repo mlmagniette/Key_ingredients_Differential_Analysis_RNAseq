@@ -28,7 +28,7 @@ DiffAnalysis.DESeq2(countTable,filter=FALSE)
 ## type-I error rate
 file<-system("ls *Comple*",T)
 typeI.error<-numeric()
-alpha=0.1
+alpha=0.05
 for (i in 1:length(file))
 {
     tmp<-read.table(file[i],sep="\t",h=T)
