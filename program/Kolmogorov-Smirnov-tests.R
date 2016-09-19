@@ -12,6 +12,11 @@ file<-file[-grep("filter-DESeq2_CompleteListe.txt",file)]
 ## remove  filtered DESeq2 from methods
 methods.KS<-c("DESeq2","DESeq","edgeR","edgeR filtered", "glm edgeR filtered","limma-voom filtered","glm edgeR","limma-voom")
 method.nb<-length(methods.KS)
+type.line.KS<-c(1,1,1,2,2,2,1,1)
+
+pch.index.KS<-c(1,2,3,3,4,5,4,5)
+color.KS<-rep(1,9)
+##color.KS<-c("cyan","blue","purple","purple","magenta","orange","magenta","orange")
 ## 
 n=1000 # number of genes 
 JJ=100 # number of sampling
@@ -50,15 +55,15 @@ stat.ks.res<-matrix(unlist(lapply(stat.ks,mean)),nrow=length(file)/method.nb,byr
 colnames(stat.ks.res)<-methods.KS
 
 ## main graphic 
-tiff(paste("../results/stat.ks.n=",n,"_nb_reech=",JJ,"_median-BW.tiff",sep=""),width=2250,height=2250,pointsize=36)
+jpeg("../results/ks.jpg")
 par(mfrow=c(1,1))
-plot(x,boxplot(stat.ks.res[,1]~rep(x,each=10),plot=F)$stats[3,],pch=pch.index[1],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",ylim=c(0,.9),type="b",xaxt="n",lwd=4,lty=type.line[1])
+plot(x,boxplot(stat.ks.res[,1]~rep(x,each=10),plot=F)$stats[3,],pch=pch.index.KS[1],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",ylim=range(stat.ks),type="b",xaxt="n",lwd=4,lty=type.line.KS[1],col=color.KS[1])
 axis(1,at=x,labels=x)
 
 for (j in 2:method.nb)
-    lines(x,boxplot(stat.ks.res[,j]~rep(x,each=10),plot=F)$stats[3,],pch=pch.index[j],type="b",lwd=4,lty=type.line[j])
+    lines(x,boxplot(stat.ks.res[,j]~rep(x,each=10),plot=F)$stats[3,],pch=pch.index.KS[j],type="b",lwd=4,lty=type.line.KS[j],col=color.KS[j])
 
-legend(x="topleft",legend=methods[which(type.line==1)],lty=1,pch=pch.index[which(type.line==1)],bty="n",lwd=4)
+legend(x="topleft",legend=methods[which(type.line==1)],lty=1,pch=pch.index.KS[which(type.line==1)],bty="n",lwd=4),col=color.KS[which(type.line==1)])
 dev.off()
 
 ## supplementary graph to show the variability of limma-voom
@@ -71,7 +76,7 @@ tiff("../results/varibility-stat.ks.tiff",width=2250,height=2250,pointsize=36)
 
 order.methods<-c("DESeq","edgeR","edgeR filtered","DESeq2","glm edgeR","limma-voom","glm edgeR filtered","limma-voom filtered")
 
-stat.ks.res<-stat.ks.res[,match(order.methods,methods)]
+stat.ks.res<-stat.ks.res[,match(order.methods,methods.KS)]
 par(mfrow=c(3,3))
 sapply(1:6,function(j) plot(rep(x,each=10),stat.ks.res[,j],xlab=titre.x,ylab="statistics of Kolmogorov-Smirnov",main=order.methods[j],ylim=range(stat.ks.res)))
 plot(rep(x,each=10),axes=FALSE,xlab="",ylab="",type="n")
